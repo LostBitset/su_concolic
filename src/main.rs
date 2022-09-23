@@ -10,42 +10,42 @@ fn main() {
 mod data {
     use std::collections::{HashMap, HashSet};
 
-    trait StateC {}
+    trait StateCo {}
 
-    trait StateS {}
+    trait StateSym {}
 
-    struct Conj<SymT: StateS>(Vec<SymT>);
-    struct Disj<SymT: StateS>(Vec<SymT>);
+    struct Conj<SymT: StateSym>(Vec<SymT>);
+    struct Disj<SymT: StateSym>(Vec<SymT>);
 
-    impl<SymT: StateS> StateS for Conj<SymT> {}
-    impl<SymT: StateS> StateS for Disj<SymT> {}
+    impl<SymT: StateSym> StateSym for Conj<SymT> {}
+    impl<SymT: StateSym> StateSym for Disj<SymT> {}
 
     #[derive(Copy, Clone, PartialEq, Hash)]
     struct BlockId(u32);
 
-    struct FullCBS<CoT: StateC, SymT: StateS> {
+    struct FullCBS<CoT: StateCo, SymT: StateSym> {
         state_c: CoT,
         state_s: Conj<SymT>,
         block: BlockId,
     }
 
-    struct CBSSet<CoT: StateC, SymT: StateS> {
+    struct CBSSet<CoT: StateCo, SymT: StateSym> {
         set: HashSet<FullCBS<CoT, SymT>>,
     }
 
-    struct PartialCBS<CoT: StateC, SymT: StateS> {
+    struct PartialCBS<CoT: StateCo, SymT: StateSym> {
         state_c: CoT,
         state_s: Conj<SymT>,
     }
 
-    enum IntermediateCBS<CoT: StateC, SymT: StateS> {
-        CBSMap {
-            map: HashMap<BlockId, PartialCBS<CoT, SymT>>
-        },
-        PureCBS {
-            state_c: CoT,
-            block: BlockId,
-        },
+    enum IntermediateCBS<CoT: StateCo, SymT: StateSym> {
+        CBSMap(HashMap<BlockId, PartialCBS<CoT, SymT>>),
+        PureCBSMap(PureCBS<CoT>),
+    }
+
+    struct PureCBS<CoT: StateCo> {
+        state_c: CoT,
+        block: BlockId,
     }
 
     enum Tree<LeafT, NodeT> {
@@ -56,6 +56,10 @@ mod data {
         Leaf {
             value: LeafT,
         },
+    }
+
+    struct CBSTree<CoT: StateCo, SymT: StateSym> {
+        tree: Tree<PureCBS<CoT>, SymT>,
     }
 }
 
