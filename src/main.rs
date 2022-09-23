@@ -10,15 +10,24 @@ fn main() {
 mod data {
     use std::collections::{HashMap, HashSet};
 
-    trait StateCo {}
+    trait StateCo {
+        // Methods will be defined here...
+    }
 
-    trait StateSym {}
+    trait StateSym {
+        // Methods will be defined here...
+    }
 
     struct Conj<SymT: StateSym>(Vec<SymT>);
     struct Disj<SymT: StateSym>(Vec<SymT>);
 
-    impl<SymT: StateSym> StateSym for Conj<SymT> {}
-    impl<SymT: StateSym> StateSym for Disj<SymT> {}
+    impl<SymT: StateSym> StateSym for Conj<SymT> {
+        // Implementation will be defined here...
+    }
+
+    impl<SymT: StateSym> StateSym for Disj<SymT> {
+        // Implementation will be defined here...
+    }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
     struct BlockId(u32);
