@@ -8,7 +8,7 @@ fn main() {
 }
 
 mod data {
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     trait StateC {}
 
@@ -29,6 +29,10 @@ mod data {
         block: BlockId,
     }
 
+    struct CBSSet<CoT: StateC, SymT: StateS> {
+        set: HashSet<FullCBS<CoT, SymT>>,
+    }
+
     struct PartialCBS<CoT: StateC, SymT: StateS> {
         state_c: CoT,
         state_s: Conj<SymT>,
@@ -36,7 +40,11 @@ mod data {
 
     enum IntermediateCBS<CoT: StateC, SymT: StateS> {
         CBSMap {
-            map: HashMap<BlockId, PartialCBS>
+            map: HashMap<BlockId, PartialCBS<CoT, SymT>>
+        },
+        PureCBS {
+            state_c: CoT,
+            block: BlockId,
         },
     }
 
