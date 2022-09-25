@@ -29,42 +29,6 @@ mod executor {
         todo!()
     }
 
-    #[derive(Clone, Default)]
-    struct Pathsrc {
-        known_part: Vec<bool>,
-        found_part: Vec<bool>,
-        idx: usize,
-    }
-
-    impl Pathsrc {
-        fn from_known(known_part: Vec<bool>) -> Self {
-            let at_known = !known_part.is_empty();
-            Self {
-                known_part,
-                found_part: Vec::new(),
-                ..Default::default()
-            }
-        }
-
-        fn solidify(&mut self) {
-            self.known_part.append(&mut self.found_part);
-        }
-
-        fn get_choice(&mut self, fallback: bool) -> bool {
-            let known_len = self.known_part.len();
-            let res;
-            if self.idx >= known_len {
-                res = self.known_part[self.idx]
-            } else if self.idx >= known_len + self.found_part.len() {
-                res = self.found_part[self.idx + known_len]
-            } else {
-                res = fallback
-            }
-            self.idx += 1;
-            return fallback;
-        }
-    }
-
     trait StateCo {
         // Methods will be defined here...
     }
