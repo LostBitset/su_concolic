@@ -26,6 +26,7 @@ mod executor {
         let FullCBS {
            state_c, state_s, block 
         } = cbs;
+        let mut tree = CBSTree::<T::CoT, SymT>::default();
         todo!()
     }
 
@@ -90,8 +91,24 @@ mod executor {
         },
     }
 
+    impl<LeafT, NodeT> Default for Tree<Option<LeafT>, NodeT> {
+        fn default() -> Self {
+            Self::Leaf {
+                value: None
+            }
+        }
+    }
+
     struct CBSTree<CoT: StateCo, SymT: StateSym> {
-        tree: Tree<PureCBS<CoT>, SymT>,
+        tree: Tree<Option<PureCBS<CoT>>, SymT>,
+    }
+
+    impl<CoT: StateCo, SymT: StateSym> Default for CBSTree<CoT, SymT> {
+        fn default() -> Self {
+            Self {
+                tree: Default::default()
+            }
+        }
     }
 }
 
