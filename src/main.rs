@@ -4,8 +4,6 @@
 #![allow(dead_code)] // For now...
 #![allow(unused_variables)] // For now...
 
-use rand::{Rng, distributions::Bernoulli};
-
 fn main() {
     println!("Hello world!");
 }
@@ -16,7 +14,7 @@ mod executor {
     trait CRPTarget<SymT: StateSym> {
         type CoT: StateCo;
         fn top(&self) -> BlockId;
-        fn exec(&self, state: Self::CoT, block: BlockId, pathsrc: &mut Pathsrc)
+        fn exec(&self, state: Self::CoT, block: BlockId)
             -> FullCBS<Self::CoT, SymT>;
     }
 
@@ -27,8 +25,7 @@ mod executor {
         let FullCBS {
            state_c, state_s, block 
         } = cbs;
-        let mut pathsrc = Pathsrc::default();
-        let initial_exec = target.exec(state_c, block, &mut pathsrc);
+        let initial_exec = target.exec(state_c, block);
         todo!()
     }
 
@@ -53,15 +50,18 @@ mod executor {
             self.known_part.append(&mut self.found_part);
         }
 
-        fn get_choice<'a>(&mut self, &'a impl rng::Rng) -> bool {
+        fn get_choice(&mut self, fallback: bool) -> bool {
             let known_len = self.known_part.len();
+            let res;
             if self.idx >= known_len {
-                self.known_part[self.idx]
+                res = self.known_part[self.idx]
             } else if self.idx >= known_len + self.found_part.len() {
-                self.found_part[self.idx + known_len]
+                res = self.found_part[self.idx + known_len]
             } else {
-                let choice = 
+                res = fallback
             }
+            self.idx += 1;
+            return fallback;
         }
     }
 
