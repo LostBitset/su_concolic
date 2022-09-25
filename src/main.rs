@@ -11,10 +11,17 @@ mod executor {
     use crate::data;
 
     pub trait CRPTarget<SymT: data::StateSym> {
-        type Co: data::StateCo;
+        type CoT: data::StateCo;
         fn top(&self) -> data::BlockId;
-        fn exec(&self, state: Self::Co, block: data::BlockId)
-            -> data::FullCBS<Self::Co, SymT>;
+        fn exec(&self, state: Self::CoT, block: data::BlockId)
+            -> data::FullCBS<Self::CoT, SymT>;
+    }
+
+    fn execute_cbs<SymT: data::StateSym, T: CRPTarget<SymT>>(
+        target: T,
+        cbs: data::FullCBS<T::CoT, SymT>
+    ) -> data::CBSSet<T::CoT, SymT> {
+        todo!()
     }
 }
 
