@@ -20,12 +20,12 @@ mod executor {
 
     fn execute_cbs<SymT: StateSym, T: CRPTarget<SymT>>(
         target: T,
-        cbs: FullCBS<T::CoT, SymT>
+        cbs: FullCBS<T::CoT, SymT>,
+        solver: Box<dyn Solver<SymT, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
         let FullCBS {
            state_c, state_s, block 
         } = cbs;
-        let initial_exec = target.exec(state_c, block);
         todo!()
     }
 
@@ -46,6 +46,10 @@ mod executor {
 
     impl<SymT: StateSym> StateSym for Disj<SymT> {
         // Implementation will be defined here...
+    }
+
+    trait Solver<SymT: StateSym> {
+        type CoT;
     }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
