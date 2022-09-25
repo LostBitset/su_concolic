@@ -23,15 +23,15 @@ mod executor {
         cbs: FullCBS<T::CoT, SymT>,
         solver: Box<dyn Solver<SymT, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
-        match cbs {
+        let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
-                CBSTree::from_line(
-                    state_s.0,
-                    PureCBS::from()
+                Tree::<_, _>::from_line(
+                    &state_s.0,
+                    Some(PureCBS { state_c, block })
                 )
             }
         };
-        todo!()
+        CBSTree { tree }
     }
 
     trait StateCo {
@@ -100,6 +100,14 @@ mod executor {
             Self::Leaf {
                 value: None
             }
+        }
+    }
+
+    impl <LeafT, NodeT> Tree<LeafT, NodeT> {
+        fn from_line<'a>(line: &impl IntoIterator<Item=NodeT>, leaf: LeafT)
+            -> Self
+        {
+            todo!()
         }
     }
 
