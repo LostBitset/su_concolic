@@ -14,14 +14,14 @@ mod executor {
     use std::collections::{HashMap, HashSet};
     use std::rc::Rc;
 
-    trait CRPTarget<SymT: StateSym>: Clone {
+    pub trait CRPTarget<SymT: StateSym>: Clone {
         type CoT: StateCo;
         fn top(&self) -> BlockId;
         fn exec(&self, state: &Self::CoT, block: BlockId)
             -> FullCBS<Self::CoT, SymT>;
     }
 
-    fn execute_cbs<SymT: StateSym, T: CRPTarget<SymT>>(
+    pub fn execute_cbs<SymT: StateSym, T: CRPTarget<SymT>>(
         target: T,
         base_cbs: FullCBS<T::CoT, SymT>,
         solver: Rc<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
@@ -105,11 +105,11 @@ mod executor {
         }
     }
 
-    trait StateCo {
+    pub trait StateCo {
         // Methods will be defined here...
     }
 
-    trait StateSym: Clone {
+    pub trait StateSym: Clone {
         // Methods will be defined here...
         
         fn invert(&mut self);
@@ -128,10 +128,10 @@ mod executor {
     }
 
     #[derive(Clone)]
-    struct Conj<SymT: StateSym>(Vector<SymT>);
+    pub struct Conj<SymT: StateSym>(Vector<SymT>);
 
     #[derive(Clone)]
-    struct Disj<SymT: StateSym>(Vector<SymT>);
+    pub struct Disj<SymT: StateSym>(Vector<SymT>);
 
     impl<SymT: StateSym> Conj<SymT> {
         fn len(&self) -> usize {
@@ -145,16 +145,16 @@ mod executor {
         }
     }
 
-    trait Solver<T> {
+    pub trait Solver<T> {
         type CoT;
 
         fn solve(&self, sym: &T) -> Option<Self::CoT>;
     }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
-    struct BlockId(u32);
+    pub struct BlockId(u32);
 
-    struct FullCBS<CoT: StateCo, SymT: StateSym> {
+    pub struct FullCBS<CoT: StateCo, SymT: StateSym> {
         state_c: CoT,
         state_s: Conj<SymT>,
         block: BlockId,
@@ -238,7 +238,7 @@ mod executor {
         }
     }
 
-    struct CBSTree<CoT: StateCo, SymT: StateSym> {
+    pub struct CBSTree<CoT: StateCo, SymT: StateSym> {
         tree: Tree<Option<PureCBS<CoT>>, SymT>,
         precedent: Conj<SymT>,
     }
