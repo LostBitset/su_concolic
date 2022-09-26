@@ -23,8 +23,10 @@ mod executor {
         cbs: FullCBS<T::CoT, SymT>,
         solver: Box<dyn Solver<SymT, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
+        let path;
         let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
+                path = state_s.0.len();
                 Tree::<_, _>::from_line(
                     state_s.0,
                     Some(PureCBS { state_c, block }),
@@ -32,7 +34,9 @@ mod executor {
                 )
             }
         };
-        todo!();
+        loop {
+
+        }
         CBSTree { tree }
     }
 
