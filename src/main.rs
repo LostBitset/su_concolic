@@ -12,11 +12,28 @@ fn main() {
 mod mock {
     use im::vector;
 
-    use crate::executor;
+    use std::rc::Rc;
+
+    use crate::executor::{self, CRPTarget};
 
     pub fn test() {
+        let target = MockCRPTarget::default();
         let solver = MockSolver::new();
-        todo!();
+        let base_cbs = executor::FullCBS {
+            state_c: MockCo {
+                the_var: 1,
+                the_value: 912,
+            },
+            state_s: executor::Conj::<MockSym>::new(vector![]),
+            block: target.top(),
+        };
+        println!("Running $executor::execute_cbs$...");
+        let resp = executor::execute_cbs(
+            target,
+            base_cbs,
+            Rc::new(solver),
+        );
+        println!("[OK-RESP] GOT {:?}", resp);
     }
 
     struct MockSolver {}
@@ -27,10 +44,24 @@ mod mock {
         }
     }
 
-    impl executor::Solver<MockSym> for MockSolver {
+    impl executor::Solver<executor::Conj<MockSym>> for MockSolver {
         type CoT = MockCo;
 
-        fn solve(&self, sym: &MockSym) -> Option<Self::CoT> {
+        fn solve(&self, sym: &executor::Conj<MockSym>) -> Option<Self::CoT> {
+            let mut the_sym: Option<MockSym> = None;
+            for i in sym {
+                if the_sym.is_none() {
+                    the_sym = Some(i);
+                } else {
+                    panic!("Cannot solve multiple clauses in <mock::MockSolver as executor::Solver<executor::Conj<mock::MockSym>>>::solve")
+                }
+            }
+            let sym;
+            if let Some(the_one_sym) = the_sym {
+                sym = the_one_sym;
+            } else {
+                panic!("Cannot solve no clauses in <mock::MockSolver as executor::Solver<executor::Conj<mock::MockSym>>>::solve");
+            }
             let MockSym {
                 desired_eq, lhs, rhs
             } = sym;
@@ -69,7 +100,7 @@ mod mock {
                     }
                 },
                 (MockSymVar::Var(_), MockSymVar::Var(_)) => {
-                    panic!("Cannot solve with multiple variables in <mock::MockSolver as executor::Solver<mock::MockSym>>::solve");
+                    panic!("Cannot solve with multiple variables in <mock::MockSolver as executor::Solver<executor::Conj<mock::MockSym>>>::solve");
                 }
             }
         }
@@ -112,7 +143,7 @@ mod mock {
         }
     }
 
-    #[derive(Clone)]
+    #[derive(Clone, Default)]
     struct MockCRPTarget {}
 
     impl executor::CRPTarget<MockSym> for MockCRPTarget {
