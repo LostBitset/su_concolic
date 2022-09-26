@@ -26,9 +26,9 @@ mod executor {
         let initial_path;
         let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
-                initial_path = vec![true; state_s.len()];
+                initial_path = state_s.0;
                 Tree::<_, _>::from_line_right(
-                    state_s.0,
+                    initial_path.clone(),
                     Some(PureCBS { state_c, block }),
                     || None,
                 )
@@ -38,8 +38,9 @@ mod executor {
         let alt_depth = path.len() - 1;
         loop {
             // invert the path condition
-            path[alt_depth] = false;
+            path[alt_depth].invert();
             // try to solve for the new path condition
+            
             // if we opened up new paths:
             //   extend the tree
             //   set the inversion target to the new bottom
@@ -54,11 +55,16 @@ mod executor {
         // Methods will be defined here...
     }
 
-    trait StateSym {
+    trait StateSym: Clone {
         // Methods will be defined here...
+        
+        fn invert(&mut self);
     }
 
+    #[derive(Clone)]
     struct Conj<SymT: StateSym>(Vec<SymT>);
+
+    #[derive(Clone)]
     struct Disj<SymT: StateSym>(Vec<SymT>);
 
     impl<SymT: StateSym> Conj<SymT> {
@@ -71,14 +77,6 @@ mod executor {
         fn len(&self) -> usize {
             self.0.len()
         }
-    }
-
-    impl<SymT: StateSym> StateSym for Conj<SymT> {
-        // Implementation will be defined here...
-    }
-
-    impl<SymT: StateSym> StateSym for Disj<SymT> {
-        // Implementation will be defined here...
     }
 
     trait Solver<SymT: StateSym> {
