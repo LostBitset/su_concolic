@@ -49,7 +49,7 @@ mod mock {
 
         fn solve(&self, sym: &executor::Conj<MockSym>) -> Option<Self::CoT> {
             let mut the_sym: Option<MockSym> = None;
-            for i in sym.into_iter() {
+            for i in sym.clone().into_iter() {
                 if the_sym.is_none() {
                     the_sym = Some(i);
                 } else {
@@ -106,7 +106,7 @@ mod mock {
         }
     }
 
-    #[derive(Default)]
+    #[derive(Default, Debug)]
     struct MockCo {
         the_var: usize,
         the_value: i32,
@@ -124,14 +124,14 @@ mod mock {
 
     impl executor::StateCo for MockCo {}
     
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     struct MockSym {
         desired_eq: bool,
         lhs: MockSymVar,
         rhs: MockSymVar,
     }
 
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     enum MockSymVar {
         Value(i32),
         Var(usize),
@@ -304,10 +304,10 @@ mod executor {
         }
     }
 
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct Conj<SymT: StateSym>(Vector<SymT>);
 
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct Disj<SymT: StateSym>(Vector<SymT>);
 
     impl<SymT: StateSym> Conj<SymT> {
@@ -354,7 +354,7 @@ mod executor {
         fn solve(&self, sym: &T) -> Option<Self::CoT>;
     }
 
-    #[derive(Copy, Clone, PartialEq, Hash)]
+    #[derive(Copy, Clone, PartialEq, Hash, Debug)]
     pub enum BlockId {
         Id(u32),
         Term,
@@ -431,11 +431,13 @@ mod executor {
         PureCBSMap(PureCBS<CoT>),
     }
 
+    #[derive(Debug)]
     struct PureCBS<CoT: StateCo> {
         state_c: CoT,
         block: BlockId,
     }
 
+    #[derive(Debug)]
     enum Tree<LeafT, NodeT> {
         Branch {
             value: NodeT,
@@ -495,6 +497,7 @@ mod executor {
         }
     }
 
+    #[derive(Debug)]
     pub struct CBSTree<CoT: StateCo, SymT: StateSym> {
         tree: Tree<Option<PureCBS<CoT>>, SymT>,
         precedent: Conj<SymT>,
