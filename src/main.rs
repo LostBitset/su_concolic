@@ -266,6 +266,7 @@ mod executor {
                             state_c, mut state_s, block
                         } = target.exec(sol, block);
                         state_s.skip_clauses(skip_conditions);
+                        println!("%% right state_s use = {:?} %%", state_s);
                         execute_cbs_rec(
                             target.clone(),
                             block,
