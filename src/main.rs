@@ -20,11 +20,17 @@ mod executor {
 
     fn execute_cbs<SymT: StateSym, T: CRPTarget<SymT>>(
         target: T,
-        cbs: FullCBS<T::CoT, SymT>,
+        base_cbs: FullCBS<T::CoT, SymT>,
         solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
+        let FullCBS {
+            state_c: base_c,
+            state_s: base_s,
+            block,
+        } = base_cbs;
+        let first_cbs = target.exec(base_c, block);
         let initial_path;
-        let mut tree = match cbs {
+        let mut tree = match first_cbs {
             FullCBS { state_c, state_s, block } => {
                 initial_path = state_s.0;
                 Tree::<_, _>::from_line_right(
@@ -41,9 +47,19 @@ mod executor {
             path[alt_depth].invert();
             // try to solve for the new path condition
             if let Some(sol) = solver.solve(Conj(path)) {
+                let FullCBS {
+                    state_c: new_c,
+                    state_s: new_s,
+                    block: new_block,
+                } = target.exec(sol, block);
+                if new_s.len() > alt_depth {
+                    // extend the tree
+                    // set the inversion target to the new bottom
+                } else {
+
+                }
                 // if we opened up new paths:
                 //   extend the tree
-                //   set the inversion target to the new bottom
                 // else:
                 //   move up the inversion target
             } else {
