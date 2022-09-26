@@ -1,8 +1,7 @@
 // State-Update Concolic Execution
 
 #![forbid(unsafe_code)]
-#![allow(dead_code)] // For now...
-#![allow(unused_variables)] // For now...
+#![allow(dead_code)]
 
 fn main() {
     println!("Hello world!");
