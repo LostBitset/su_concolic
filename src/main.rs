@@ -14,7 +14,7 @@ mod executor {
     use std::collections::{HashMap, HashSet};
     use std::rc::Rc;
 
-    trait CRPTarget<SymT: StateSym> {
+    trait CRPTarget<SymT: StateSym>: Clone {
         type CoT: StateCo;
         fn top(&self) -> BlockId;
         fn exec(&self, state: &Self::CoT, block: BlockId)
@@ -55,7 +55,7 @@ mod executor {
         match state_conj.pop_front() {
             Some(head) => {
                 let l = Box::new(execute_cbs_rec(
-                   target,
+                   target.clone(),
                    block,
                    FullCBS {
                        state_s: Conj(state_conj),
@@ -71,8 +71,20 @@ mod executor {
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
                     pre_conj.push_front(head.invert_clone());
-                    solver.solve(Conj(pre_conj));
-                    todo!()
+                    let precedent_inv = Conj(pre_conj);
+                    if let Some(sol) = solver.solve(&precedent_inv) {
+                        execute_cbs_rec(
+                            target.clone(),
+                            block,
+                            target.exec(&sol, block),
+                            precedent_inv,
+                            solver,
+                        )
+                    } else {
+                        Tree::Leaf {
+                            value: None,
+                        }
+                    }
                 });
                 Tree::Branch {
                     value: head.to_owned(),
@@ -136,7 +148,7 @@ mod executor {
     trait Solver<T> {
         type CoT;
 
-        fn solve(&self, sym: T) -> Option<Self::CoT>;
+        fn solve(&self, sym: &T) -> Option<Self::CoT>;
     }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
