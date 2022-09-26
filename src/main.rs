@@ -26,8 +26,8 @@ mod executor {
         let initial_path;
         let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
-                initial_path = vec![false; state_s.len()];
-                Tree::<_, _>::from_line(
+                initial_path = vec![true; state_s.len()];
+                Tree::<_, _>::from_line_right(
                     state_s.0,
                     Some(PureCBS { state_c, block }),
                     || None,
@@ -75,6 +75,8 @@ mod executor {
 
     trait Solver<SymT: StateSym> {
         type CoT;
+
+        fn solve(&self, sym: SymT, co: Self::CoT) -> Option<Self::CoT>;
     }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
@@ -125,7 +127,7 @@ mod executor {
     }
 
     impl <LeafT, NodeT> Tree<LeafT, NodeT> {
-        fn from_line(
+        fn from_line_left(
             line: Vec<NodeT>,
             leaf_end: LeafT,
             leaf_default: impl Fn() -> LeafT,
@@ -139,6 +141,25 @@ mod executor {
                     r: Box::new(
                         Self::Leaf { value: leaf_default() }
                     ),
+                };
+            }
+            tree
+        }
+        
+        fn from_line_right(
+            line: Vec<NodeT>,
+            leaf_end: LeafT,
+            leaf_default: impl Fn() -> LeafT,
+        ) -> Self {
+            let mut line = line.into_iter().rev();
+            let mut tree = Self::Leaf { value: leaf_end };
+            while let Some(head) = line.next() {
+                tree = Self::Branch {
+                    value: head,
+                    l: Box::new(
+                        Self::Leaf { value: leaf_default() }
+                    ),
+                    r: Box::new(tree),
                 };
             }
             tree
