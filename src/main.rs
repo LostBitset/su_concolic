@@ -40,11 +40,13 @@ mod executor {
                 )
             }
         };
+        let mut path_abstr = vec![true; initial_path.len()];
         let mut path = initial_path;
         let mut alt_depth = path.len() - 1;
         loop {
             // invert the path condition
             path[alt_depth].invert();
+            path_abstr[alt_depth] = !path_abstr[alt_depth];
             // try to solve for the new path condition
             if let Some(sol) = solver.solve(Conj(path)) {
                 let FullCBS {
