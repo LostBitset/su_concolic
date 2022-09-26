@@ -4,27 +4,90 @@
 #![allow(dead_code)]
 
 fn main() {
-    println!("No tests.");
-    // println!("Running test...");
-    // mock::test();
-    // println!("[OK] Test passed.");
+    println!("Running test...");
+    mock::test();
+    println!("[OK] Test passed.");
 }
 
 mod mock {
     use im::vector;
 
     use crate::executor;
-    use std::collections::HashMap;
 
-    pub fn test() {}
+    pub fn test() {
+        let solver = MockSolver::new();
+        todo!();
+    }
 
+    struct MockSolver {}
+
+    impl MockSolver {
+        fn new() -> Self {
+            Self {}
+        }
+    }
+
+    impl executor::Solver<MockSym> for MockSolver {
+        type CoT = MockCo;
+
+        fn solve(&self, sym: &MockSym) -> Option<Self::CoT> {
+            let MockSym {
+                desired_eq, lhs, rhs
+            } = sym;
+            match (lhs, rhs) {
+                (MockSymVar::Value(x), MockSymVar::Value(y)) => {
+                    if (x == y) == *desired_eq {
+                        Some(MockCo::default())
+                    } else {
+                        None
+                    }
+                },
+                (MockSymVar::Var(var), MockSymVar::Value(z)) => {
+                    if *desired_eq {
+                        Some(MockCo {
+                            the_var: *var,
+                            the_value: *z,
+                        })
+                    } else {
+                        Some(MockCo {
+                            the_var: *var,
+                            the_value: *z + 1,
+                        })
+                    }
+                },
+                (MockSymVar::Value(z), MockSymVar::Var(var)) => {
+                    if *desired_eq {
+                        Some(MockCo {
+                            the_var: *var,
+                            the_value: *z,
+                        })
+                    } else {
+                        Some(MockCo {
+                            the_var: *var,
+                            the_value: *z + 1,
+                        })
+                    }
+                },
+                (MockSymVar::Var(_), MockSymVar::Var(_)) => {
+                    panic!("Cannot solve with multiple variables in <mock::MockSolver as executor::Solver<mock::MockSym>>::solve");
+                }
+            }
+        }
+    }
+
+    #[derive(Default)]
     struct MockCo {
-        vars: HashMap<usize, i32>,
+        the_var: usize,
+        the_value: i32,
     }
 
     impl MockCo {
         fn get(&self, k: &usize) -> Option<&i32> {
-            self.vars.get(k)
+            if *k == self.the_var {
+                Some(&self.the_value)
+            } else {
+                panic!("Invalid value access in mock::MockCo[[inherent]]::get");
+            }
         }
     }
 
