@@ -21,7 +21,7 @@ mod executor {
     fn execute_cbs<SymT: StateSym, T: CRPTarget<SymT>>(
         target: T,
         cbs: FullCBS<T::CoT, SymT>,
-        solver: Box<dyn Solver<SymT, CoT=T::CoT>>,
+        solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
         let initial_path;
         let mut tree = match cbs {
@@ -35,12 +35,15 @@ mod executor {
             }
         };
         let mut path = initial_path;
-        let alt_depth = path.len() - 1;
-        loop {
+        let mut alt_depth = path.len() - 1;
+        while alt_depth >= 0 {
             // invert the path condition
             path[alt_depth].invert();
             // try to solve for the new path condition
-            
+            if let sol = solver.solve(Conj(path)) {
+
+            }
+            alt_depth += 1;
             // if we opened up new paths:
             //   extend the tree
             //   set the inversion target to the new bottom
@@ -79,10 +82,10 @@ mod executor {
         }
     }
 
-    trait Solver<SymT: StateSym> {
+    trait Solver<T> {
         type CoT;
 
-        fn solve(&self, sym: SymT, co: Self::CoT) -> Option<Self::CoT>;
+        fn solve(&self, sym: T) -> Option<Self::CoT>;
     }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
