@@ -14,7 +14,7 @@ mod executor {
     trait CRPTarget<SymT: StateSym> {
         type CoT: StateCo;
         fn top(&self) -> BlockId;
-        fn exec(&self, state: Self::CoT, block: BlockId)
+        fn exec(&self, state: &Self::CoT, block: BlockId)
             -> FullCBS<Self::CoT, SymT>;
     }
 
@@ -28,19 +28,24 @@ mod executor {
             state_s: base_s,
             block,
         } = base_cbs;
-        let first_cbs = target.exec(base_c, block);
+        let first_cbs = target.exec(&base_c, block); 
         CBSTree {
-            tree: execute_cbs_rec(target, base_c, block, solver),
+            tree: execute_cbs_rec(target, block, first_cbs, solver),
             precedent: base_s,
         }
     }
 
     fn execute_cbs_rec<SymT: StateSym, T: CRPTarget<SymT>>(
         target: T,
-        base_c: T::CoT,
         block: BlockId,
+        left_example: FullCBS<T::CoT, SymT>,
         solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
-    ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {}
+    ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
+        match &left_example.state_s.0[..] {
+            [head, tail @ ..] => {},
+            _ => {},
+        }
+    }
 
     trait StateCo {
         // Methods will be defined here...
