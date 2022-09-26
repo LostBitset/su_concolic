@@ -4,7 +4,75 @@
 #![allow(dead_code)]
 
 fn main() {
-    println!("Hello world!");
+    println!("Running test...");
+    mock::test();
+    println!("[OK] Test passed.");
+}
+
+mod mock {
+    use crate::executor;
+    use std::collections::HashMap;
+
+    pub fn test() {}
+
+    struct MockCo {
+        vars: HashMap<usize, i32>,
+    }
+
+    impl executor::StateCo for MockCo {}
+    
+    #[derive(Clone)]
+    struct MockSym {
+        desired_eq: bool,
+        lhs: MockSymVar,
+        rhs: MockSymVar,
+    }
+
+    #[derive(Clone)]
+    enum MockSymVar {
+        Value(i32),
+        Var(usize),
+    }
+
+    impl executor::StateSym for MockSym {
+        fn invert(&mut self) {
+            self.desired_eq = !self.desired_eq;
+        }
+    }
+
+    #[derive(Clone)]
+    struct MockCRPTarget {}
+
+    impl executor::CRPTarget<MockSym> for MockCRPTarget {
+        type CoT = MockCo;
+        
+        fn top(&self) -> executor::BlockId {
+            Default::default()
+        }
+        
+        fn exec(&self, state: &Self::CoT, block: executor::BlockId)
+            -> executor::FullCBS<Self::CoT, MockSym>
+        {
+            let top = self.top();
+            if block == top {
+                executor::FullCBS {
+                    state_c: state,
+                    state_s: executor::Conj::new(
+                        vector![
+                            StateSym {
+                                desired_eq: state.vars.get(1) == 42,
+                                lhs: MockSymVar::Value(42),
+                                rhs: MockSymVar::Var(1),
+                            },
+                        ]
+                    ),
+                    block: BlockId::Term,
+                };
+            } else {
+                panic!("Invalid block in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym>>::exec");
+            }
+        }
+    }
 }
 
 mod executor {
@@ -151,7 +219,42 @@ mod executor {
     }
 
     #[derive(Copy, Clone, PartialEq, Hash)]
-    pub struct BlockId(u32);
+    pub enum BlockId {
+        Id(u32),
+        Term,
+    }
+
+    impl Default for BlockId {
+        fn default() -> Self {
+            Self::Id(0)
+        }
+    }
+
+    #[derive(Default)]
+    pub struct BlockIdGen {
+        last: BlockId,
+    }
+
+    impl BlockIdGen {
+        pub fn new() -> Self {
+            Self::default()
+        }
+
+        pub fn from_last(last: BlockId) -> Self {
+            Self {
+                last,
+            }
+        }
+    }
+
+    impl Iterator for BlockIdGen {
+        type Item = BlockId;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.last.0 += 1;
+            Some(self.last)
+        }
+    }
 
     pub struct FullCBS<CoT: StateCo, SymT: StateSym> {
         state_c: CoT,
