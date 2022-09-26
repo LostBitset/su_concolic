@@ -12,6 +12,7 @@ mod executor {
     use im::vector::Vector;
 
     use std::collections::{HashMap, HashSet};
+    use std::rc::Rc;
 
     trait CRPTarget<SymT: StateSym> {
         type CoT: StateCo;
@@ -23,7 +24,7 @@ mod executor {
     fn execute_cbs<SymT: StateSym, T: CRPTarget<SymT>>(
         target: T,
         base_cbs: FullCBS<T::CoT, SymT>,
-        solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
+        solver: Rc<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
         let FullCBS {
             state_c: base_c,
@@ -48,7 +49,7 @@ mod executor {
         block: BlockId,
         left_example: FullCBS<T::CoT, SymT>,
         precedent: Conj<SymT>,
-        solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
+        solver: Rc<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
         let mut state_conj = left_example.state_s.0.clone();
         match state_conj.pop_front() {
@@ -65,11 +66,12 @@ mod executor {
                        pre_conj.push_front(head.clone());
                        Conj(pre_conj)
                    },
-                   solver,
+                   solver.clone(),
                 ));
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
                     pre_conj.push_front(head.invert_clone());
+                    solver.solve(Conj(pre_conj));
                     todo!()
                 });
                 Tree::Branch {
