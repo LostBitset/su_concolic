@@ -35,9 +35,17 @@ mod executor {
             }
         };
         let mut path = initial_path;
-        let alt_depth = path.len();
+        let alt_depth = path.len() - 1;
         loop {
             todo!();
+            // invert the path condition
+            path[alt_depth] = false;
+            // try to solve for the new path condition
+            // if we opened up new paths:
+            //   extend the tree
+            //   set the inversion target to the new bottom
+            // else:
+            //   move up the inversion target
         }
         CBSTree { tree }
     }
