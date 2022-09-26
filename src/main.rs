@@ -262,7 +262,7 @@ mod executor {
                         let FullCBS {
                             state_c, mut state_s, block
                         } = target.exec(sol, block);
-                        state_s.skip(skip_conditions);
+                        state_s.skip_clauses(skip_conditions);
                         execute_cbs_rec(
                             target.clone(),
                             block,
