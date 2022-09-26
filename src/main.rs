@@ -26,7 +26,7 @@ mod executor {
         let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
                 Tree::<_, _>::from_line(
-                    &mut state_s.0.into_iter(),
+                    state_s.0,
                     Some(PureCBS { state_c, block }),
                     || None,
                 )
@@ -107,11 +107,12 @@ mod executor {
     }
 
     impl <LeafT, NodeT> Tree<LeafT, NodeT> {
-        fn from_line<'a>(
-            line: &'a mut impl Iterator<Item=NodeT>,
+        fn from_line(
+            line: Vec<NodeT>,
             leaf_end: LeafT,
             leaf_default: impl Fn() -> LeafT,
         ) -> Self {
+            let mut line = line.into_iter().rev();
             let mut tree = Self::Leaf { value: leaf_end };
             while let Some(head) = line.next() {
                 tree = Self::Branch {
