@@ -10,7 +10,7 @@ fn main() {
     // println!("[OK] Test passed.");
 }
 
-/*mod mock {
+mod mock {
     use im::vector;
 
     use crate::executor;
@@ -20,6 +20,12 @@ fn main() {
 
     struct MockCo {
         vars: HashMap<usize, i32>,
+    }
+
+    impl MockCo {
+        fn get(&self, k: &usize) -> Option<&i32> {
+            self.vars.get(k)
+        }
     }
 
     impl executor::StateCo for MockCo {}
@@ -53,30 +59,37 @@ fn main() {
             Default::default()
         }
         
-        fn exec(&self, state: &Self::CoT, block: executor::BlockId)
-            -> executor::FullCBS<&Self::CoT, MockSym>
+        fn exec(&self, state: Self::CoT, block: executor::BlockId)
+            -> executor::FullCBS<Self::CoT, MockSym>
         {
             let top = self.top();
             if block == top {
+                let cond = {
+                    if let Some(value) = state.get(&1) {
+                        *value == 42
+                    } else {
+                        false
+                    }
+                };
                 executor::FullCBS {
                     state_c: state,
                     state_s: executor::Conj::new(
                         vector![
                             MockSym {
-                                desired_eq: state.vars.get(1) == Some(42),
+                                desired_eq: cond,
                                 lhs: MockSymVar::Value(42),
                                 rhs: MockSymVar::Var(1),
                             },
                         ]
                     ),
                     block: executor::BlockId::Term,
-                };
+                }
             } else {
                 panic!("Invalid block in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym>>::exec");
             }
         }
     }
-}*/
+}
 
 mod executor {
     use im::vector::Vector;
@@ -287,9 +300,9 @@ mod executor {
     }
 
     pub struct FullCBS<CoT: StateCo, SymT: StateSym> {
-        state_c: CoT,
-        state_s: Conj<SymT>,
-        block: BlockId,
+        pub state_c: CoT,
+        pub state_s: Conj<SymT>,
+        pub block: BlockId,
     }
 
     struct CBSSet<CoT: StateCo, SymT: StateSym> {
