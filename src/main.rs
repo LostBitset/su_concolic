@@ -27,7 +27,7 @@ mod mock {
             state_s: executor::Conj::<MockSym>::new(vector![]),
             block: target.top(),
         };
-        println!("Running $executor::execute_cbs$...");
+        println!("Running >>>executor::execute_cbs<<<...");
         let resp = executor::execute_cbs(
             target,
             base_cbs,
@@ -49,7 +49,7 @@ mod mock {
 
         fn solve(&self, sym: &executor::Conj<MockSym>) -> Option<Self::CoT> {
             let mut the_sym: Option<MockSym> = None;
-            for i in sym {
+            for i in sym.into_iter() {
                 if the_sym.is_none() {
                     the_sym = Some(i);
                 } else {
@@ -67,35 +67,35 @@ mod mock {
             } = sym;
             match (lhs, rhs) {
                 (MockSymVar::Value(x), MockSymVar::Value(y)) => {
-                    if (x == y) == *desired_eq {
+                    if (x == y) == desired_eq {
                         Some(MockCo::default())
                     } else {
                         None
                     }
                 },
                 (MockSymVar::Var(var), MockSymVar::Value(z)) => {
-                    if *desired_eq {
+                    if desired_eq {
                         Some(MockCo {
-                            the_var: *var,
-                            the_value: *z,
+                            the_var: var,
+                            the_value: z,
                         })
                     } else {
                         Some(MockCo {
-                            the_var: *var,
-                            the_value: *z + 1,
+                            the_var: var,
+                            the_value: z + 1,
                         })
                     }
                 },
                 (MockSymVar::Value(z), MockSymVar::Var(var)) => {
-                    if *desired_eq {
+                    if desired_eq {
                         Some(MockCo {
-                            the_var: *var,
-                            the_value: *z,
+                            the_var: var,
+                            the_value: z,
                         })
                     } else {
                         Some(MockCo {
-                            the_var: *var,
-                            the_value: *z + 1,
+                            the_var: var,
+                            the_value: z + 1,
                         })
                     }
                 },
@@ -327,6 +327,24 @@ mod executor {
 
         fn len(&self) -> usize {
             self.0.len()
+        }
+    }
+
+    impl<SymT: StateSym> IntoIterator for Conj<SymT> {
+        type IntoIter = <Vector<SymT> as IntoIterator>::IntoIter;
+        type Item = SymT;
+
+        fn into_iter(self) -> Self::IntoIter {
+            self.0.into_iter()
+        }
+    }
+
+    impl<SymT: StateSym> IntoIterator for Disj<SymT> {
+        type IntoIter = <Vector<SymT> as IntoIterator>::IntoIter;
+        type Item = SymT;
+
+        fn into_iter(self) -> Self::IntoIter {
+            self.0.into_iter()
         }
     }
 
