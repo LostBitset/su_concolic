@@ -68,7 +68,7 @@ mod mock {
                     if let Some(value) = state.get(&1) {
                         *value == 42
                     } else {
-                        false
+                        panic!("Value #1 not defined in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym, CoT=mock::MockCo>>::exec");
                     }
                 };
                 executor::FullCBS {
@@ -85,7 +85,7 @@ mod mock {
                     block: executor::BlockId::Term,
                 }
             } else {
-                panic!("Invalid block in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym>>::exec");
+                panic!("Invalid block in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym, CoT=mock::MockCo>>::exec");
             }
         }
     }
