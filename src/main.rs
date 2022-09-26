@@ -62,7 +62,11 @@ mod executor {
                             state_s: Conj(state_conj),
                             ..left_example
                         },
-                        todo!(),
+                        {
+                            let mut pre_conj = precedent.0.clone();
+                            pre_conj.push_front(head);
+                            Conj(pre_conj)
+                        },
                         solver,
                     )),
                     r: Box::new({
