@@ -43,20 +43,19 @@ mod executor {
     ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
         match &left_example.state_s.0[..] {
             [head, tail @ ..] => {
-                todo!()
-                /*Tree::Branch {
-                    value: head,
+                Tree::Branch {
+                    value: head.to_owned(),
                     l: Box::new(execute_cbs_rec(
                         target,
                         block,
                         FullCBS {
-                            state_s: Conj(tail),
+                            state_s: Conj(tail.to_vec()),
                             ..left_example
                         },
                         solver,
                     )),
                     r: todo!(),
-                }*/
+                }
             },
             _ => {
                 todo!()
