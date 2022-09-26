@@ -29,47 +29,18 @@ mod executor {
             block,
         } = base_cbs;
         let first_cbs = target.exec(base_c, block);
-        let initial_path;
-        let mut tree = match first_cbs {
-            FullCBS { state_c, state_s, block } => {
-                initial_path = state_s.0;
-                Tree::<_, _>::from_line_right(
-                    initial_path.clone(),
-                    Some(PureCBS { state_c, block }),
-                    || None,
-                )
-            }
-        };
-        let mut path_abstr = vec![true; initial_path.len()];
-        let mut path = initial_path;
-        let mut alt_depth = path.len() - 1;
-        loop {
-            // invert the path condition
-            path[alt_depth].invert();
-            path_abstr[alt_depth] = !path_abstr[alt_depth];
-            // try to solve for the new path condition
-            if let Some(sol) = solver.solve(Conj(path)) {
-                let FullCBS {
-                    state_c: new_c,
-                    state_s: new_s,
-                    block: new_block,
-                } = target.exec(sol, block);
-                if new_s.len() > alt_depth {
-                    // extend the tree
-                    // set the inversion target to the new bottom
-                    todo!();
-                } else {
-                    if alt_depth == 0 { break; }
-                    alt_depth -= 1;
-                }
-            } else {
-                if alt_depth == 0 { break; }
-                alt_depth -= 1;
-            }
-            todo!();
+        CBSTree {
+            tree: execute_cbs_rec(target, base_c, block, solver),
+            precedent: base_s,
         }
-        CBSTree { tree }
     }
+
+    fn execute_cbs_rec<SymT: StateSym, T: CRPTarget<SymT>>(
+        target: T,
+        base_c: T::CoT,
+        block: BlockId,
+        solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
+    ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {}
 
     trait StateCo {
         // Methods will be defined here...
@@ -194,12 +165,14 @@ mod executor {
 
     struct CBSTree<CoT: StateCo, SymT: StateSym> {
         tree: Tree<Option<PureCBS<CoT>>, SymT>,
+        precedent: Conj<SymT>,
     }
 
-    impl<CoT: StateCo, SymT: StateSym> Default for CBSTree<CoT, SymT> {
-        fn default() -> Self {
+    impl<CoT: StateCo, SymT: StateSym> CBSTree<CoT, SymT> {
+        fn from_precedent(precedent: Conj<SymT>) -> Self {
             Self {
-                tree: Default::default()
+                tree: Default::default(),
+                precedent,
             }
         }
     }
