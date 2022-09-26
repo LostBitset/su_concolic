@@ -23,10 +23,10 @@ mod executor {
         cbs: FullCBS<T::CoT, SymT>,
         solver: Box<dyn Solver<SymT, CoT=T::CoT>>,
     ) -> CBSTree<T::CoT, SymT> {
-        let path;
+        let initial_path;
         let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
-                path = state_s.0.len();
+                initial_path = vec![false; state_s.len()];
                 Tree::<_, _>::from_line(
                     state_s.0,
                     Some(PureCBS { state_c, block }),
@@ -34,8 +34,10 @@ mod executor {
                 )
             }
         };
+        let mut path = initial_path;
+        let alt_depth = path.len();
         loop {
-
+            todo!();
         }
         CBSTree { tree }
     }
@@ -50,6 +52,18 @@ mod executor {
 
     struct Conj<SymT: StateSym>(Vec<SymT>);
     struct Disj<SymT: StateSym>(Vec<SymT>);
+
+    impl<SymT: StateSym> Conj<SymT> {
+        fn len(&self) -> usize {
+            self.0.len()
+        }
+    }
+
+    impl<SymT: StateSym> Disj<SymT> {
+        fn len(&self) -> usize {
+            self.0.len()
+        }
+    }
 
     impl<SymT: StateSym> StateSym for Conj<SymT> {
         // Implementation will be defined here...
