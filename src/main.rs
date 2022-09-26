@@ -9,6 +9,8 @@ fn main() {
 }
 
 mod executor {
+    use im::vector::Vector;
+
     use std::collections::{HashMap, HashSet};
 
     trait CRPTarget<SymT: StateSym> {
@@ -30,7 +32,13 @@ mod executor {
         } = base_cbs;
         let first_cbs = target.exec(&base_c, block); 
         CBSTree {
-            tree: execute_cbs_rec(target, block, first_cbs, base_s, solver),
+            tree: execute_cbs_rec(
+                target,
+                block,
+                first_cbs,
+                base_s.clone(),
+                solver
+            ),
             precedent: base_s,
         }
     }
@@ -42,26 +50,27 @@ mod executor {
         precedent: Conj<SymT>,
         solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
-        match &left_example.state_s.0[..] {
-            [head, tail @ ..] => {
+        let mut state_conj = left_example.state_s.0.clone();
+        match state_conj.pop_front() {
+            Some(head) => {
                 Tree::Branch {
                     value: head.to_owned(),
                     l: Box::new(execute_cbs_rec(
                         target,
                         block,
                         FullCBS {
-                            state_s: Conj(tail.to_owned()),
+                            state_s: Conj(state_conj),
                             ..left_example
                         },
-                        (),
+                        todo!(),
                         solver,
                     )),
                     r: Box::new({
-                        ()
+                        todo!()
                     }),
                 }
             },
-            _ => {
+            None => {
                 Tree::Leaf {
                     value: Some(
                         PureCBS {
@@ -85,10 +94,10 @@ mod executor {
     }
 
     #[derive(Clone)]
-    struct Conj<SymT: StateSym>(Vec<SymT>);
+    struct Conj<SymT: StateSym>(Vector<SymT>);
 
     #[derive(Clone)]
-    struct Disj<SymT: StateSym>(Vec<SymT>);
+    struct Disj<SymT: StateSym>(Vector<SymT>);
 
     impl<SymT: StateSym> Conj<SymT> {
         fn len(&self) -> usize {
