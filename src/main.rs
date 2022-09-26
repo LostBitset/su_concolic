@@ -53,25 +53,29 @@ mod executor {
         let mut state_conj = left_example.state_s.0.clone();
         match state_conj.pop_front() {
             Some(head) => {
+                let l = Box::new(execute_cbs_rec(
+                   target,
+                   block,
+                   FullCBS {
+                       state_s: Conj(state_conj),
+                       ..left_example
+                   },
+                   {
+                       let mut pre_conj = precedent.0.clone();
+                       pre_conj.push_front(head.clone());
+                       Conj(pre_conj)
+                   },
+                   solver,
+                ));
+                let r = Box::new({
+                    let mut pre_conj = precedent.0.clone();
+                    pre_conj.push_front(head.invert_clone());
+                    todo!()
+                });
                 Tree::Branch {
                     value: head.to_owned(),
-                    l: Box::new(execute_cbs_rec(
-                        target,
-                        block,
-                        FullCBS {
-                            state_s: Conj(state_conj),
-                            ..left_example
-                        },
-                        {
-                            let mut pre_conj = precedent.0.clone();
-                            pre_conj.push_front(head);
-                            Conj(pre_conj)
-                        },
-                        solver,
-                    )),
-                    r: Box::new({
-                        todo!()
-                    }),
+                    l,
+                    r,
                 }
             },
             None => {
@@ -95,6 +99,18 @@ mod executor {
         // Methods will be defined here...
         
         fn invert(&mut self);
+    }
+
+    trait InvertClone: Clone {
+        fn invert_clone(&self) -> Self;
+    }
+
+    impl<ImplT: StateSym> InvertClone for ImplT {
+        fn invert_clone(&self) -> Self {
+            let mut new = self.clone();
+            new.invert();
+            new
+        }
     }
 
     #[derive(Clone)]
