@@ -217,7 +217,8 @@ mod executor {
                 block,
                 first_cbs,
                 base_s.clone(),
-                solver
+                solver,
+                0
             ),
             precedent: base_s,
         }
@@ -229,6 +230,7 @@ mod executor {
         left_example: FullCBS<T::CoT, SymT>,
         precedent: Conj<SymT>,
         solver: Rc<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
+        skip_conditions: usize,
     ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
         let mut state_conj = left_example.state_s.0.clone();
         match state_conj.pop_front() {
@@ -248,6 +250,7 @@ mod executor {
                        Conj(pre_conj)
                    },
                    solver.clone(),
+                   skip_conditions + 1,
                 ));
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
@@ -256,12 +259,21 @@ mod executor {
                     println!("^^right> {:?}", pre_conj);
                     let precedent_inv = Conj(pre_conj);
                     if let Some(sol) = solver.solve(&precedent_inv) {
+                        let FullCBS {
+                            state_c, mut state_s, block
+                        } = target.exec(sol, block);
+                        state_s.skip(skip_conditions);
                         execute_cbs_rec(
                             target.clone(),
                             block,
-                            target.exec(sol, block),
+                            FullCBS {
+                                state_c,
+                                state_s,
+                                block,
+                            },
                             precedent_inv,
                             solver,
+                            skip_conditions + 1,
                         )
                     } else {
                         Tree::Leaf {
