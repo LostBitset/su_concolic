@@ -235,6 +235,7 @@ mod executor {
         let mut state_conj = left_example.state_s.0.clone();
         match state_conj.pop_front() {
             Some(head) => {
+                println!("BEGIN LEFT");
                 let l = Box::new(execute_cbs_rec(
                    target.clone(),
                    block,
@@ -252,6 +253,8 @@ mod executor {
                    solver.clone(),
                    skip_conditions + 1,
                 ));
+                println!("END LEFT");
+                println!("BEGIN RIGHT");
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
                     pre_conj.push_front(head.invert_clone());
@@ -281,6 +284,7 @@ mod executor {
                         }
                     }
                 });
+                println!("END RIGHT");
                 Tree::Branch {
                     value: head.to_owned(),
                     l,
@@ -288,6 +292,7 @@ mod executor {
                 }
             },
             None => {
+                println!("TAIL TAIL TAIL");
                 Tree::Leaf {
                     value: Some(
                         PureCBS {
@@ -335,6 +340,12 @@ mod executor {
 
         fn len(&self) -> usize {
             self.0.len()
+        }
+
+        fn skip_clauses(&mut self, n: usize) {
+            for _ in 0..n {
+                self.0.pop_front();
+            }
         }
     }
 
