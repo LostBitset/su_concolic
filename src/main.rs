@@ -42,8 +42,25 @@ mod executor {
         solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
         match &left_example.state_s.0[..] {
-            [head, tail @ ..] => {},
-            _ => {},
+            [head, tail @ ..] => {
+                todo!()
+                /*Tree::Branch {
+                    value: head,
+                    l: Box::new(execute_cbs_rec(
+                        target,
+                        block,
+                        FullCBS {
+                            state_s: Conj(tail),
+                            ..left_example
+                        },
+                        solver,
+                    )),
+                    r: todo!(),
+                }*/
+            },
+            _ => {
+                todo!()
+            },
         }
     }
 
