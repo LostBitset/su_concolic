@@ -37,7 +37,6 @@ mod executor {
         let mut path = initial_path;
         let alt_depth = path.len() - 1;
         loop {
-            todo!();
             // invert the path condition
             path[alt_depth] = false;
             // try to solve for the new path condition
@@ -46,6 +45,7 @@ mod executor {
             //   set the inversion target to the new bottom
             // else:
             //   move up the inversion target
+            todo!();
         }
         CBSTree { tree }
     }
