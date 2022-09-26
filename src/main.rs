@@ -54,11 +54,18 @@ mod executor {
                         },
                         solver,
                     )),
-                    r: todo!(),
+                    r: (),
                 }
             },
             _ => {
-                todo!()
+                Tree::Leaf {
+                    value: Some(
+                        PureCBS {
+                            state_c: left_example.state_c,
+                            block: left_example.block,
+                        }
+                    ),
+                }
             },
         }
     }
