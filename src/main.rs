@@ -26,11 +26,13 @@ mod executor {
         let mut tree = match cbs {
             FullCBS { state_c, state_s, block } => {
                 Tree::<_, _>::from_line(
-                    &state_s.0,
-                    Some(PureCBS { state_c, block })
+                    &mut state_s.0.into_iter(),
+                    Some(PureCBS { state_c, block }),
+                    || None,
                 )
             }
         };
+        todo!();
         CBSTree { tree }
     }
 
@@ -89,6 +91,7 @@ mod executor {
         Branch {
             value: NodeT,
             l: Box<Tree<LeafT, NodeT>>,
+            r: Box<Tree<LeafT, NodeT>>,
         },
         Leaf {
             value: LeafT,
@@ -104,10 +107,22 @@ mod executor {
     }
 
     impl <LeafT, NodeT> Tree<LeafT, NodeT> {
-        fn from_line<'a>(line: &impl IntoIterator<Item=NodeT>, leaf: LeafT)
-            -> Self
-        {
-            todo!()
+        fn from_line<'a>(
+            line: &'a mut impl Iterator<Item=NodeT>,
+            leaf_end: LeafT,
+            leaf_default: impl Fn() -> LeafT,
+        ) -> Self {
+            let mut tree = Self::Leaf { value: leaf_end };
+            while let Some(head) = line.next() {
+                tree = Self::Branch {
+                    value: head,
+                    l: Box::new(tree),
+                    r: Box::new(
+                        Self::Leaf { value: leaf_default() }
+                    ),
+                };
+            }
+            tree
         }
     }
 
