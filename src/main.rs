@@ -49,7 +49,9 @@ mod mock {
 
         fn solve(&self, sym: &executor::Conj<MockSym>) -> Option<Self::CoT> {
             let mut the_sym: Option<MockSym> = None;
+            println!("(solver [MockSolver]executor::Solver invoked)");
             for i in sym.clone().into_iter() {
+                println!("^ clause: {:?}", i);
                 if the_sym.is_none() {
                     the_sym = Some(i);
                 } else {
@@ -241,6 +243,8 @@ mod executor {
                    {
                        let mut pre_conj = precedent.0.clone();
                        pre_conj.push_front(head.clone());
+                       println!(">>In the found (left) case:");
+                       println!("^^left> {:?}", pre_conj);
                        Conj(pre_conj)
                    },
                    solver.clone(),
@@ -248,6 +252,8 @@ mod executor {
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
                     pre_conj.push_front(head.invert_clone());
+                    println!(">>In the solved (right) case:");
+                    println!("^^right> {:?}", pre_conj);
                     let precedent_inv = Conj(pre_conj);
                     if let Some(sol) = solver.solve(&precedent_inv) {
                         execute_cbs_rec(
@@ -286,7 +292,7 @@ mod executor {
         // Methods will be defined here...
     }
 
-    pub trait StateSym: Clone {
+    pub trait StateSym: Clone + std::fmt::Debug {
         // Methods will be defined here...
         
         fn invert(&mut self);
