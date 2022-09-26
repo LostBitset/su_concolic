@@ -36,19 +36,20 @@ mod executor {
         };
         let mut path = initial_path;
         let mut alt_depth = path.len() - 1;
-        while alt_depth >= 0 {
+        loop {
             // invert the path condition
             path[alt_depth].invert();
             // try to solve for the new path condition
-            if let sol = solver.solve(Conj(path)) {
-
+            if let Some(sol) = solver.solve(Conj(path)) {
+                // if we opened up new paths:
+                //   extend the tree
+                //   set the inversion target to the new bottom
+                // else:
+                //   move up the inversion target
+            } else {
+                if alt_depth == 0 { break; }
+                alt_depth -= 1;
             }
-            alt_depth += 1;
-            // if we opened up new paths:
-            //   extend the tree
-            //   set the inversion target to the new bottom
-            // else:
-            //   move up the inversion target
             todo!();
         }
         CBSTree { tree }
