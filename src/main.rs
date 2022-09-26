@@ -30,7 +30,7 @@ mod executor {
         } = base_cbs;
         let first_cbs = target.exec(&base_c, block); 
         CBSTree {
-            tree: execute_cbs_rec(target, block, first_cbs, solver),
+            tree: execute_cbs_rec(target, block, first_cbs, base_s, solver),
             precedent: base_s,
         }
     }
@@ -39,6 +39,7 @@ mod executor {
         target: T,
         block: BlockId,
         left_example: FullCBS<T::CoT, SymT>,
+        precedent: Conj<SymT>,
         solver: Box<dyn Solver<Conj<SymT>, CoT=T::CoT>>,
     ) -> Tree<Option<PureCBS<T::CoT>>, SymT> {
         match &left_example.state_s.0[..] {
@@ -52,9 +53,12 @@ mod executor {
                             state_s: Conj(tail.to_owned()),
                             ..left_example
                         },
+                        (),
                         solver,
                     )),
-                    r: (),
+                    r: Box::new({
+                        ()
+                    }),
                 }
             },
             _ => {
