@@ -49,7 +49,7 @@ mod executor {
                         target,
                         block,
                         FullCBS {
-                            state_s: Conj(tail.to_vec()),
+                            state_s: Conj(tail.to_owned()),
                             ..left_example
                         },
                         solver,
