@@ -55,13 +55,11 @@ mod executor {
                 if new_s.len() > alt_depth {
                     // extend the tree
                     // set the inversion target to the new bottom
+                    todo!();
                 } else {
-
+                    if alt_depth == 0 { break; }
+                    alt_depth -= 1;
                 }
-                // if we opened up new paths:
-                //   extend the tree
-                // else:
-                //   move up the inversion target
             } else {
                 if alt_depth == 0 { break; }
                 alt_depth -= 1;
