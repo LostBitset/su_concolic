@@ -4,12 +4,12 @@
 #![allow(dead_code)]
 
 fn main() {
-    println!("Running test...");
-    mock::test();
-    println!("[OK] Test passed.");
+    println!("Testing **executor** (with mock_executor)...");
+    mock_executor::test();
+    println!("...all done");
 }
 
-mod mock {
+mod mock_executor {
     use im::vector;
 
     use std::rc::Rc;
@@ -49,20 +49,18 @@ mod mock {
 
         fn solve(&self, sym: &executor::Conj<MockSym>) -> Option<Self::CoT> {
             let mut the_sym: Option<MockSym> = None;
-            println!("(solver [MockSolver]executor::Solver invoked)");
             for i in sym.clone().into_iter() {
-                println!("^ clause: {:?}", i);
                 if the_sym.is_none() {
                     the_sym = Some(i);
                 } else {
-                    panic!("Cannot solve multiple clauses in <mock::MockSolver as executor::Solver<executor::Conj<mock::MockSym>>>::solve")
+                    panic!("Cannot solve multiple clauses in <mock_executor::MockSolver as executor::Solver<executor::Conj<mock_executor::MockSym>>>::solve")
                 }
             }
             let sym;
             if let Some(the_one_sym) = the_sym {
                 sym = the_one_sym;
             } else {
-                panic!("Cannot solve no clauses in <mock::MockSolver as executor::Solver<executor::Conj<mock::MockSym>>>::solve");
+                panic!("Cannot solve no clauses in <mock_executor::MockSolver as executor::Solver<executor::Conj<mock_executor::MockSym>>>::solve");
             }
             let MockSym {
                 desired_eq, lhs, rhs
@@ -102,7 +100,7 @@ mod mock {
                     }
                 },
                 (MockSymVar::Var(_), MockSymVar::Var(_)) => {
-                    panic!("Cannot solve with multiple variables in <mock::MockSolver as executor::Solver<executor::Conj<mock::MockSym>>>::solve");
+                    panic!("Cannot solve with multiple variables in <mock_executor::MockSolver as executor::Solver<executor::Conj<mock_executor::MockSym>>>::solve");
                 }
             }
         }
@@ -119,7 +117,7 @@ mod mock {
             if *k == self.the_var {
                 Some(&self.the_value)
             } else {
-                panic!("Invalid value access in mock::MockCo[[inherent]]::get");
+                panic!("Invalid value access in mock_executor::MockCo[[inherent]]::get");
             }
         }
     }
@@ -164,7 +162,7 @@ mod mock {
                     if let Some(value) = state.get(&1) {
                         *value == 42
                     } else {
-                        panic!("Value #1 not defined in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym, CoT=mock::MockCo>>::exec");
+                        panic!("Value #1 not defined in <mock_executor::MockCRPTarget as executor::CRPTarget<mock_executor::MockSym, CoT=mock_executor::MockCo>>::exec");
                     }
                 };
                 executor::FullCBS {
@@ -181,7 +179,7 @@ mod mock {
                     block: executor::BlockId::Term,
                 }
             } else {
-                panic!("Invalid block in <mock::MockCRPTarget as executor::CRPTarget<mock::MockSym, CoT=mock::MockCo>>::exec");
+                panic!("Invalid block in <mock_executor::MockCRPTarget as executor::CRPTarget<mock_executor::MockSym, CoT=mock_executor::MockCo>>::exec");
             }
         }
     }
@@ -235,7 +233,6 @@ mod executor {
         let mut state_conj = left_example.state_s.0.clone();
         match state_conj.pop_front() {
             Some(head) => {
-                println!("BEGIN LEFT");
                 let l = Box::new(execute_cbs_rec(
                    target.clone(),
                    block,
@@ -246,27 +243,20 @@ mod executor {
                    {
                        let mut pre_conj = precedent.0.clone();
                        pre_conj.push_front(head.clone());
-                       println!(">>In the found (left) case:");
-                       println!("^^left> {:?}", pre_conj);
                        Conj(pre_conj)
                    },
                    solver.clone(),
                    skip_conditions + 1,
                 ));
-                println!("END LEFT");
-                println!("BEGIN RIGHT");
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
                     pre_conj.push_front(head.invert_clone());
-                    println!(">>In the solved (right) case:");
-                    println!("^^right> {:?}", pre_conj);
                     let precedent_inv = Conj(pre_conj);
                     if let Some(sol) = solver.solve(&precedent_inv) {
                         let FullCBS {
                             state_c, mut state_s, block
                         } = target.exec(sol, block);
                         state_s.skip_clauses(skip_conditions + 1);
-                        println!("%% right state_s use = {:?} %%", state_s);
                         execute_cbs_rec(
                             target.clone(),
                             block,
@@ -285,7 +275,6 @@ mod executor {
                         }
                     }
                 });
-                println!("END RIGHT");
                 Tree::Branch {
                     value: head.to_owned(),
                     l,
@@ -293,7 +282,6 @@ mod executor {
                 }
             },
             None => {
-                println!("TAIL TAIL TAIL");
                 Tree::Leaf {
                     value: Some(
                         PureCBS {
