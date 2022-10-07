@@ -138,8 +138,10 @@ mod mock_executor {
     }
 
     impl executor::StateSym for MockSym {
-        fn invert(&mut self) {
-            self.desired_eq = !self.desired_eq;
+        fn invert(&self) -> Self {
+            let mut new = self.clone();
+            new.desired_eq = !new.desired_eq;
+            return new;
         }
     }
 
@@ -250,7 +252,7 @@ mod executor {
                 ));
                 let r = Box::new({
                     let mut pre_conj = precedent.0.clone();
-                    pre_conj.push_front(head.invert_clone());
+                    pre_conj.push_front(head.invert());
                     let precedent_inv = Conj(pre_conj);
                     if let Some(sol) = solver.solve(&precedent_inv) {
                         let FullCBS {
@@ -301,19 +303,7 @@ mod executor {
     pub trait StateSym: Clone + std::fmt::Debug {
         // Methods will be defined here...
         
-        fn invert(&mut self);
-    }
-
-    trait InvertClone: Clone {
-        fn invert_clone(&self) -> Self;
-    }
-
-    impl<ImplT: StateSym> InvertClone for ImplT {
-        fn invert_clone(&self) -> Self {
-            let mut new = self.clone();
-            new.invert();
-            new
-        }
+        fn invert(&self) -> Self;
     }
 
     #[derive(Clone, Debug)]
