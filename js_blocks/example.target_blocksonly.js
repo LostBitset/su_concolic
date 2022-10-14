@@ -13,7 +13,7 @@ function __claimblock(f, args) {
 }
 
 function __sendNextCallback(f, args) {
-	console.log('GOT NEXT CALLBACK: ', f, 'with arguments', args);
+	console.log('GOT NEXT CALLBACK:', f, 'with arguments', args);
 }
 
 // end declarations for instrumentation blocksonly
