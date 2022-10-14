@@ -25,15 +25,15 @@ __claimblock('__top__', []);
 import fs from 'fs';
 
 fs.readFile('something.txt', 'utf8', (() => {
-	let __func_0 = ((...__args) => {
-		__claimblock(__func_0, __args);
+	let __cfunc = ((...__args) => {
+		__claimblock(__cfunc, __args);
 		return ((err, contents) => {
 			if (err !== null) {
 				throw new Error(err.toString());
 			} else {
-				fs.readFile('something.txt', 'utf8', (() => {
-					let __func_1 = ((...__args) => {
-						__claimblock(__func_1, __args);
+				fs.readFile('something2.txt', 'utf8', (() => {
+					let __cfunc = ((...__args) => {
+						__claimblock(__cfunc, __args);
 						return ((err, contents2) => {
 							if (err !== null) {
 								throw new Error(err.toString());
@@ -42,11 +42,11 @@ fs.readFile('something.txt', 'utf8', (() => {
 							}
 						})(...__args);
 					});
-					return __func_1;
+					return __cfunc;
 				})());
 			}
 		})(...__args);
 	});
-	return __func_0;
+	return __cfunc;
 })());
 

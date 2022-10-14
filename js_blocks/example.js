@@ -4,7 +4,7 @@ fs.readFile('something.txt', 'utf8', (err, contents) => {
 	if (err !== null) {
 		throw new Error(err.toString());
 	} else {
-		fs.readFile('something.txt', 'utf8', (err, contents2) => {
+		fs.readFile('something2.txt', 'utf8', (err, contents2) => {
 			if (err !== null) {
 				throw new Error(err.toString());
 			} else {
