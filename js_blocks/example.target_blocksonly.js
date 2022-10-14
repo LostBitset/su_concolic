@@ -31,7 +31,19 @@ fs.readFile('something.txt', 'utf8', (() => {
 			if (err !== null) {
 				throw new Error(err.toString());
 			} else {
-				console.log(contents);
+				fs.readFile('something.txt', 'utf8', (() => {
+					let __func_1 = ((...__args) => {
+						__claimblock(__func_1, __args);
+						return ((err, contents2) => {
+							if (err !== null) {
+								throw new Error(err.toString());
+							} else {
+								console.log(contents === contents2);
+							}
+						})(...__args);
+					});
+					return __func_1;
+				})());
 			}
 		})(...__args);
 	});
