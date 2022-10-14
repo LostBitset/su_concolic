@@ -8,7 +8,8 @@ fs.readFile('something.txt', 'utf8', (err, contents) => {
 			if (err !== null) {
 				throw new Error(err.toString());
 			} else {
-				console.log(contents === contents2);
+				let eq = (x, y) => (x === y);
+				console.log(eq(contents, contents2));
 			}
 		});
 	}
